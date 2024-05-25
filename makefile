@@ -101,7 +101,7 @@ cs: fix-php stan ## Run all coding standards checks
 static-analysis: stan ## Run the static analysis (PHPStan)
 
 stan: ## Run PHPStan
-	@$(PHPSTAN) analyse -c phpstan.neon --memory-limit 1G
+	@$(PHPSTAN) analyse -c phpstan.dist.neon --memory-limit 1G
 
 lint-php: ## Lint files with php-cs-fixer
 	@$(PHP_CS_FIXER) fix --allow-risky=yes --dry-run

@@ -5,3 +5,7 @@ services:
 
     App\Tests\Bdd\:
         resource: '../tests/Bdd/*'
+
+    App\Tests\Bdd\Context\DemoContext:
+        arguments:
+            - '@App\Kernel'
