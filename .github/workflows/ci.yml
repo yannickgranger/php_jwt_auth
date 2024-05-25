@@ -1,0 +1,96 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+      - feature/*
+
+  pull_request: ~
+  workflow_dispatch: ~
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
+  cancel-in-progress: true
+
+jobs:
+  tests:
+    name: Tests
+    runs-on: self-hosted
+    steps:
+      -
+        name: Checkout
+        uses: actions/checkout@v4
+
+      -
+        name: Clean previous stages
+        run: make down
+      -
+        name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      -
+        name: Build Docker images
+        uses: docker/bake-action@v4
+        with:
+          pull: true
+          load: true
+          files: |
+            compose.yaml
+            compose.override.yaml
+      #          set: |
+      #            *.cache-from=type=gha,scope=${{github.ref}}
+      #            *.cache-from=type=gha,scope=refs/heads/main
+      #            *.cache-to=type=gha,scope=${{github.ref}},mode=max
+
+      -
+        name: Start services
+        run: docker compose up --wait --no-build
+      -
+        name: Check HTTP reachability
+        run: curl -v --fail-with-body http://localhost
+      -
+        name: Check HTTPS reachability
+        run: curl -vk --fail-with-body https://localhost
+      -
+        name: Create test database
+        run: |
+          docker compose exec -T php bin/console -e test doctrine:database:drop --force || true
+          docker compose exec -T php bin/console -e test doctrine:database:create
+      -
+        name: Run migrations
+        run: docker compose exec -T php bin/console -e test doctrine:migrations:migrate --no-interaction
+
+      -
+        name: Validate migrations
+        run: |
+          DIFF_OUTPUT=$(docker compose exec php bin/console d:s:u --dump-sql)
+          if [ $DIFF_STATUS -eq 0 ]; then
+            echo "Schema is sync with entity mappings."
+          else
+              echo "WARNING: Schema is not in sync with your entity mappings!"
+              if [[ ! -z "$DIFF_OUTPUT" ]]; then
+                echo "Schema Diff:"
+                echo "$DIFF_OUTPUT"
+              else
+                echo "**Unable to retrieve detailed schema diff. Please refer to Doctrine documentation for alternative methods.**"
+              fi
+          fi
+
+      -
+        name: Run PHPUnit
+        run: docker compose exec -T php sh -c "APP_ENV=test ./vendor/bin/phpunit tests"
+      -
+        name: Run Behat
+        run: docker compose exec -T php sh -c "APP_ENV=test ./vendor/bin/behat --colors"
+
+  lint:
+    name: Docker Lint
+    runs-on: ubuntu-latest
+    steps:
+      -
+        name: Checkout
+        uses: actions/checkout@v4
+      -
+        name: Lint Dockerfile
+        uses: hadolint/hadolint-action@v3.1.0
