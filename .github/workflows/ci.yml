@@ -15,21 +15,19 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  tests:
-    name: Tests
+  build:
+    name: Build
     runs-on: self-hosted
     steps:
       -
         name: Checkout
         uses: actions/checkout@v4
-
       -
         name: Clean previous stages
         run: make down
       -
         name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
-
       -
         name: Build Docker images
         uses: docker/bake-action@v4
@@ -39,14 +37,19 @@ jobs:
           files: |
             compose.yaml
             compose.override.yaml
-      #          set: |
-      #            *.cache-from=type=gha,scope=${{github.ref}}
-      #            *.cache-from=type=gha,scope=refs/heads/main
-      #            *.cache-to=type=gha,scope=${{github.ref}},mode=max
 
+  check-services:
+    name: Check services
+    runs-on: self-hosted
+    needs: build
+    steps:
       -
         name: Start services
         run: docker compose up --wait --no-build
+
+      - name: Validate composer.json and composer.lock
+        run: docker compose exec -T php composer validate
+
       -
         name: Check HTTP reachability
         run: curl -v --fail-with-body http://localhost
@@ -61,7 +64,6 @@ jobs:
       -
         name: Run migrations
         run: docker compose exec -T php bin/console -e test doctrine:migrations:migrate --no-interaction
-
       -
         name: Validate migrations
         run: |
@@ -78,12 +80,45 @@ jobs:
               fi
           fi
 
+  code-style:
+    name: Check code-style
+    runs-on: self-hosted
+    needs: check-services
+    steps:
+      -
+        name: Run cs-fixer
+        run: docker compose exec -T php vendor/bin/php-cs-fixer fix --allow-risky=yes --dry-run
+
+  static-analysis:
+    name: Perform static-analysis
+    runs-on: self-hosted
+    needs: check-services
+    steps:
+      -
+        name: Run phpstan
+        run: docker compose exec -T php vendor/bin/phpstan analyze --xdebug --configuration phpstan.dist.neon
+
+  tests:
+    name: Run tests
+    runs-on: self-hosted
+    needs: check-services
+    steps:
       -
         name: Run PHPUnit
         run: docker compose exec -T php sh -c "APP_ENV=test ./vendor/bin/phpunit tests"
       -
         name: Run Behat
         run: docker compose exec -T php sh -c "APP_ENV=test ./vendor/bin/behat --colors"
+
+  security:
+    name: Symfony Security
+    runs-on: ubuntu-latest
+    needs: check-services
+    steps:
+      - uses: actions/checkout@v4
+      - uses: symfonycorp/security-checker-action@v5
+        with:
+          lock: ./backend/composer.lock
 
   lint:
     name: Docker Lint

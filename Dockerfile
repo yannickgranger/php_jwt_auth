@@ -23,6 +23,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 	git \
 	&& rm -rf /var/lib/apt/lists/*
 
+
 RUN set -eux; \
 	install-php-extensions \
 		@composer \
@@ -52,8 +53,11 @@ CMD [ "frankenphp", "run", "--config", "/etc/caddy/Caddyfile" ]
 FROM frankenphp_base AS frankenphp_dev
 
 ENV APP_ENV=dev XDEBUG_MODE=off
+ADD https://github.com/fabpot/local-php-security-checker/releases/download/v2.1.3/local-php-security-checker_linux_amd64 local-security-checker.sh
 
 RUN mv "$PHP_INI_DIR/php.ini-development" "$PHP_INI_DIR/php.ini" \
+    && mv local-security-checker.sh /usr/local/bin/local-security-checker.sh \
+    && chmod +x /usr/local/bin/local-security-checker.sh \
     && usermod -u 1000 www-data # change to your UID
 RUN set -eux; \
 	install-php-extensions \
@@ -61,6 +65,7 @@ RUN set -eux; \
 	;
 
 COPY --link .docker/frankenphp/conf.d/app.dev.ini $PHP_INI_DIR/conf.d/
+
 
 CMD [ "frankenphp", "run", "--config", "/etc/caddy/Caddyfile", "--watch" ]
 
@@ -79,6 +84,8 @@ COPY --link .docker/frankenphp/worker.Caddyfile /etc/caddy/worker.Caddyfile
 
 # prevent the reinstallation of vendors at every changes in the source code
 COPY --link backend/composer.* backend/symfony.* ./
+COPY --from=frankenphp_base  /usr/local/bin/local-security-checker.sh /usr/local/bin/local-security-checker.sh
+
 RUN set -eux; \
 	composer install --no-cache --prefer-dist --no-dev --no-autoloader --no-scripts --no-progress
 
