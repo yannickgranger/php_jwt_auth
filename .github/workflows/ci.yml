@@ -5,6 +5,7 @@ on:
     branches:
       - main
       - feature/*
+      - fix/*
 
   pull_request: ~
   workflow_dispatch: ~
@@ -51,7 +52,7 @@ jobs:
         run: curl -v --fail-with-body http://localhost
       -
         name: Check HTTPS reachability
-        run: curl -vk --fail-with-body https://localhost
+        run: curl -vk --fail-with-body https://localhost/time
       -
         name: Create test database
         run: |
