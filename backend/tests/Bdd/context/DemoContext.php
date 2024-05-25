@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Tests\Bdd;
+namespace App\Tests\Bdd\context;
 
 use Behat\Behat\Context\Context;
 use Symfony\Component\HttpFoundation\Request;
