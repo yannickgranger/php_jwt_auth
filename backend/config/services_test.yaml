@@ -9,3 +9,6 @@ services:
     App\Tests\Bdd\Context\DemoContext:
         arguments:
             - '@App\Kernel'
+
+    App\Domain\Repository\UserRepositoryInterface:
+        class: App\Tests\__Mock__\InMemoryUserRepository
