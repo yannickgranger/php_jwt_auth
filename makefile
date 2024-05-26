@@ -43,9 +43,11 @@ up: ## Start the docker hub in detached mode (no logs)
 
 start: build up ## Build and start the containers
 
-down: ## Stop the docker hub
+down: ## Stop and remove all previous containers
 	@$(DOCKER_COMP) down --remove-orphans
 	@$(DOCKER) container prune -f
+	@docker stop $(docker ps -a -q) || true
+	@docker rm $(docker ps -a -q) || true
 	@-$(DOCKER) volume rm $(docker volume -ls) -f
 
 check: ## Docker check
