@@ -2,25 +2,22 @@
 
 declare(strict_types=1);
 
-
 namespace App\Tests\Bdd\Context;
 
 use Behat\Behat\Context\Context;
-use Behat\Behat\Tester\Exception\PendingException;
 use Behat\Gherkin\Node\TableNode;
 use Symfony\Component\HttpClient\HttpClient;
 use Symfony\Component\PropertyAccess\PropertyAccess;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 use Symfony\Contracts\HttpClient\ResponseInterface;
 use Webmozart\Assert\Assert;
-use function PHPStan\Testing\assertType;
+
 use function PHPUnit\Framework\assertEquals;
 use function PHPUnit\Framework\assertIsArray;
 use function PHPUnit\Framework\assertNotNull;
 
 class UserAccountContext implements Context
 {
-
     private HttpClientInterface $httpClient;
 
     private ?string $jwt = null;
@@ -30,12 +27,9 @@ class UserAccountContext implements Context
     private array $userInfo = [];
 
     public function __construct(
-
     ) {
         $this->httpClient = HttpClient::createForBaseUri('https://localhost');
-
     }
-
 
     /**
      * @Given I am an authorized user
@@ -44,8 +38,8 @@ class UserAccountContext implements Context
     {
         $payload =
             [
-                "username"  => "john.doe@example.com",
-                "password"  => "jDoe@123_*ExAmPle.com"
+                'username' => 'john.doe@example.com',
+                'password' => 'jDoe@123_*ExAmPle.com',
             ]
         ;
 
@@ -54,7 +48,7 @@ class UserAccountContext implements Context
                 'Content-Type' => 'application/json',
                 'Accept' => 'application/json',
             ],
-            'json' => $payload
+            'json' => $payload,
         ]);
         $data = json_decode($response->getContent(), true);
         $this->jwt = $data['token'];
@@ -70,8 +64,8 @@ class UserAccountContext implements Context
                 'Content-Type' => 'application/json',
                 'Accept' => 'application/json',
                 'Authorization' => 'Bearer '.$this->jwt,
-            ]
-        ]);;
+            ],
+        ]);
     }
 
     /**
@@ -85,14 +79,10 @@ class UserAccountContext implements Context
     /**
      * @Then the response body is in JSON format
      */
-    public function theResponseBodyIsInJsonFormat()
+    public function theResponseBodyIsInJsonFormat(): void
     {
         $responseContent = $this->response->getContent();
-        try{
-            $data = json_decode($responseContent, true);
-        } catch (\Exception $exception){
-
-        }
+        $data = json_decode($responseContent, true);
         assertNotNull($data);
         assertIsArray($data);
         $this->userInfo = $data;
@@ -106,7 +96,7 @@ class UserAccountContext implements Context
         $rows = $table->getRows();
         array_shift($rows);
         $accessor = PropertyAccess::createPropertyAccessor();
-        foreach ($rows as $field){
+        foreach ($rows as $field) {
             $name = $field[0];
             $type = $field[1];
             $value = $accessor->getValue($this->userInfo, "[$name]");

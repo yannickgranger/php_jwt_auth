@@ -12,6 +12,7 @@ use App\Domain\Service\UserRegistrationValidationService;
 use App\Presentation\Dto\UserRegistrationDto;
 use Behat\Behat\Context\Context;
 use Behat\Gherkin\Node\PyStringNode;
+
 use function PHPUnit\Framework\assertCount;
 use function PHPUnit\Framework\assertEquals;
 use function PHPUnit\Framework\assertInstanceOf;
@@ -108,7 +109,7 @@ final class RegistrationContext implements Context
      */
     public function theExceptionMessageShouldBe(PyStringNode $string): void
     {
-        assertEquals(implode(PHP_EOL, $string->getStrings()),$this->exception->getMessage());
+        assertEquals(implode(PHP_EOL, $string->getStrings()), $this->exception->getMessage());
     }
 
     /**
@@ -116,9 +117,8 @@ final class RegistrationContext implements Context
      */
     public function theUserShouldBeRegisteredSuccessfully($arg1): void
     {
-        assertInstanceOf(User::class,$this->userRepository->findByUsername($arg1));
+        assertInstanceOf(User::class, $this->userRepository->findByUsername($arg1));
     }
-
 
     public function getException(): \Exception
     {

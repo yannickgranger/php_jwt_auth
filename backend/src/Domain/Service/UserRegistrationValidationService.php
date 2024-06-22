@@ -38,10 +38,10 @@ class UserRegistrationValidationService
             Assert::string($password, 'password must be a string');
             Assert::minLength($password, 16, 'password must be at least 16');
             Assert::maxLength($password, 255, 'password must be less than 255');
-            Assert::regex($password, "/(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])/",
+            Assert::regex($password, '/(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])/',
                 'password should contain at least one uppercase and lowercase letter, one number');
             $intersect = array_intersect(
-                ['!','@','#','$','%','^','&','*','_','+','=','-','~','`',':',],
+                ['!', '@', '#', '$', '%', '^', '&', '*', '_', '+', '=', '-', '~', '`', ':'],
                 str_split($password)
             );
             Assert::true(count($intersect) >= 1, 'password should contain at least 1 special character');

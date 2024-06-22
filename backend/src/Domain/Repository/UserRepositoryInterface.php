@@ -17,5 +17,6 @@ interface UserRepositoryInterface
     public function existsByEmail(string $email): bool;
 
     public function remove(User $user): void;
+
     public function save(User $user): void;
 }

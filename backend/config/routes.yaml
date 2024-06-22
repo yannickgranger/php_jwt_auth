@@ -1,9 +1,12 @@
+# config/routes.yaml
 controllers:
     resource:
-        path: ../src/Presentation/Http/Api/Action
-        namespace: App\Presentation\Http\Api\Action
+        path: ../src/Presentation/Http/
+        namespace: App\Presentation\Http
     type: attribute
 
-# config/routes.yaml
+
 api_login_check:
     path: /api/login_check
+
+

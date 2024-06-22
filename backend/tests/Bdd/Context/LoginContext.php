@@ -2,7 +2,6 @@
 
 declare(strict_types=1);
 
-
 namespace App\Tests\Bdd\Context;
 
 use App\Domain\Repository\UserRepositoryInterface;
@@ -16,6 +15,7 @@ use Symfony\Component\HttpClient\HttpClient;
 use Symfony\Component\HttpKernel\KernelInterface;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 use Symfony\Contracts\HttpClient\ResponseInterface;
+
 use function PHPUnit\Framework\assertArrayHasKey;
 use function PHPUnit\Framework\assertEquals;
 use function PHPUnit\Framework\assertGreaterThanOrEqual;
@@ -27,7 +27,6 @@ final class LoginContext implements Context
     private HttpClientInterface $httpClient;
     private UserRegistrationService $userRegistrationService;
     private UserRegistrationValidationService $userRegistrationValidationService;
-    private ?\Exception $exception = null;
     private ?ResponseInterface $response = null;
     private ?string $jwt = null;
 
@@ -63,7 +62,6 @@ final class LoginContext implements Context
             $userDto = new UserRegistrationDto(data: $data);
             $this->userRegistrationService->register($userDto);
         } catch (\Exception $exception) {
-            $this->exception = $exception;
         }
 
         $users = $this->userRepository->findAll();
@@ -78,12 +76,11 @@ final class LoginContext implements Context
     public function theUserMakeAHttpRequestToWithBody($arg1, $arg2, PyStringNode $string)
     {
         $body = json_decode($string->getRaw(), true);
-        if($arg1 === 'POST'){
+        if ($arg1 === 'POST') {
             $this->response = $this->httpClient->request($arg1, $arg2, [
                 'json' => $body,
             ]);
         }
-
     }
 
     /**
@@ -96,11 +93,11 @@ final class LoginContext implements Context
             $arg1,
             'https://localhost'.$arg2,
             [
-            'headers' => [
-                'Accept'=> 'application/json',
-                'Authorization' => 'Bearer '.$this->jwt,
-            ]
-        ]);
+                'headers' => [
+                    'Accept' => 'application/json',
+                    'Authorization' => 'Bearer '.$this->jwt,
+                ],
+            ]);
     }
 
     /**
@@ -132,7 +129,6 @@ final class LoginContext implements Context
         assertArrayHasKey('username', $jwtContent);
     }
 
-
     /**
      * @Given the jwt contains the following elements:
      */
@@ -141,10 +137,9 @@ final class LoginContext implements Context
         $jwtContent = $this->tokenManager->parse($this->jwt);
         unset($jwtContent['iat']);
         unset($jwtContent['exp']);
-        $expected = json_decode(implode($string->getStrings()),true);
+        $expected = json_decode(implode($string->getStrings()), true);
         assertEquals($jwtContent, $expected);
     }
-
 
     /**
      * @Given the response content should contain a :arg1
@@ -152,7 +147,7 @@ final class LoginContext implements Context
     public function theResponseContentShouldContainA($arg1)
     {
         $content = json_decode($this->response->getContent(), true);
-        if($arg1 === 'datetime'){
+        if ($arg1 === 'datetime') {
             assertArrayHasKey('date', $content);
             assertArrayHasKey('timezone_type', $content);
             assertArrayHasKey('timezone', $content);

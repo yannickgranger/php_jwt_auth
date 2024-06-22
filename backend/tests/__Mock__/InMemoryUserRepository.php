@@ -75,9 +75,16 @@ class InMemoryUserRepository implements UserRepositoryInterface, UserLoaderInter
     public function loadUserByIdentifier(string $identifier): ?UserInterface
     {
         foreach ($this->users->getIterator() as $user) {
-            if($user->getIdentifier() === $identifier) {
+            if ($user->getIdentifier() === $identifier) {
                 return $user;
             }
         }
+
+        return null;
+    }
+
+    public function remove(User $user): void
+    {
+        return;
     }
 }
