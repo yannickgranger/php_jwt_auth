@@ -3,7 +3,9 @@ default:
         default:
             contexts:
                 - App\Tests\Bdd\Context\DemoContext
+                - App\Tests\Bdd\Context\LoginContext
                 - App\Tests\Bdd\Context\RegistrationContext
+                - App\Tests\Bdd\Context\UserAccountContext
             paths:
                 features: tests/Bdd/Features
 

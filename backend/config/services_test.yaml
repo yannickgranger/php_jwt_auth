@@ -10,5 +10,7 @@ services:
         arguments:
             - '@App\Kernel'
 
-    App\Domain\Repository\UserRepositoryInterface:
-        class: App\Tests\__Mock__\InMemoryUserRepository
+
+#    for uit tests (without api auth)
+#    App\Domain\Repository\UserRepositoryInterface:
+#        class: App\Tests\__Mock__\InMemoryUserRepository

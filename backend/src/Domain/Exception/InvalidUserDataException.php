@@ -7,7 +7,7 @@ namespace App\Domain\Exception;
 /**
  * thrown in app layer.
  */
-class InvalidUserDataException extends UserRegistrationException
+final class InvalidUserDataException extends UserRegistrationException
 {
     public function __construct(string $message = '', int $code = 0, ?\Throwable $previous = null)
     {

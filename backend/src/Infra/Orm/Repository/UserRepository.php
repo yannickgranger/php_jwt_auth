@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Infra\Repository;
+namespace App\Infra\Orm\Repository;
 
 use App\Domain\Entity\User;
 use App\Domain\Repository\UserRepositoryInterface;
@@ -14,11 +14,6 @@ class UserRepository extends ServiceEntityRepository implements UserRepositoryIn
     public function __construct(ManagerRegistry $registry)
     {
         parent::__construct($registry, User::class);
-    }
-
-    public function findAll(): array
-    {
-        return $this->findAll();
     }
 
     public function existsByUsername(string $username): bool
@@ -41,9 +36,16 @@ class UserRepository extends ServiceEntityRepository implements UserRepositoryIn
     public function findByUsername(string $username): ?User
     {
         $qb = $this->createQueryBuilder('u');
-        $qb->where('username = :username');
+        $qb->where('u.username = :username');
         $qb->setParameter('username', $username);
 
         return $qb->getQuery()->getOneOrNullResult();
+    }
+
+    public function remove(User $user): void
+    {
+        $em = $this->getEntityManager();
+        $em->remove($user);
+        $em->flush();
     }
 }

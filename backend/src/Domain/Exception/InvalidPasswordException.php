@@ -7,6 +7,6 @@ namespace App\Domain\Exception;
 /**
  * thrown by domain.
  */
-class InvalidPasswordException extends UserRegistrationException
+final class InvalidPasswordException extends UserRegistrationException
 {
 }
