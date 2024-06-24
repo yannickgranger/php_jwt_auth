@@ -44,6 +44,9 @@ jobs:
     needs: build
     steps:
       -
+        name: Remove previous docker containers
+        run: make down
+      -
         name: Start services
         run: docker compose up --wait --no-build
 
@@ -55,7 +58,7 @@ jobs:
         run: curl -v --fail-with-body http://localhost
       -
         name: Check HTTPS reachability
-        run: curl -vk --fail-with-body https://localhost/time
+        run: curl -vk --fail-with-body https://localhost/ping
       -
         name: Create test database
         run: |

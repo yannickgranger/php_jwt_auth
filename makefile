@@ -43,9 +43,11 @@ up: ## Start the docker hub in detached mode (no logs)
 
 start: build up ## Build and start the containers
 
-down: ## Stop the docker hub
+down: ## Stop and remove all previous containers
 	@$(DOCKER_COMP) down --remove-orphans
 	@$(DOCKER) container prune -f
+	@docker stop $(docker ps -a -q) || true
+	@docker rm $(docker ps -a -q) || true
 	@-$(DOCKER) volume rm $(docker volume -ls) -f
 
 check: ## Docker check
@@ -79,11 +81,9 @@ sf: ## List all Symfony commands or pass the parameter "c=" to run a given comma
 cc: c=c:c ## Clear the cache
 cc: sf
 
-
 ## —— Project 🐝 ———————————————————————————————————————————————————————————————
 cc-redis: ## Flush all Redis cache
 	@$(REDIS) -p 6389 flushall
-
 
 ## —— Tests ✅ —————————————————————————————————————————————————————————————————
 test: check ## Run tests with optionnal suite and filter
@@ -93,7 +93,6 @@ test: check ## Run tests with optionnal suite and filter
 
 behat:
 	@APP_ENV=test $(BEHAT) --colors --stop-on-failure $(BEHAT_FLAGS)
-
 
 ## —— Coding standards ✨ ——————————————————————————————————————————————————————
 cs: fix-php stan ## Run all coding standards checks

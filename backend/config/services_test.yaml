@@ -9,3 +9,8 @@ services:
     App\Tests\Bdd\Context\DemoContext:
         arguments:
             - '@App\Kernel'
+
+
+#    for uit tests (without api auth)
+#    App\Domain\Repository\UserRepositoryInterface:
+#        class: App\Tests\__Mock__\InMemoryUserRepository
